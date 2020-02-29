@@ -1,0 +1,283 @@
+import math
+import random
+from flask import Flask, render_template, request
+from wtforms import Form, TextField
+from  more_itertools import unique_everseen
+app = Flask(__name__)
+
+
+class MyForm(Form):  # этот класс нужен, чтобы определить, как будет выглядеть форма
+    name = TextField('число:')
+
+
+def file(word):
+    s = set()
+    d = []
+    f = open(word)
+    for line in range(1,20):
+        for h in f:
+            joj = h[:len(h) - 1]
+            # print(h,joj)
+            s.add(joj[:line])
+        f.close()
+        f = open(word)
+        d.append(s)
+        s = set()
+    return d
+
+
+def solve(s, voc, form):
+    processed = [s]
+    ost = len(voc) * 10
+    for c in voc:
+        new_processed = []
+        for i in range(0, 10):
+            for p in processed:
+                if str(i) not in p:
+                    new_processed.append(p.replace(c, str(i)))
+        processed = new_processed
+        ost -= 10
+        render_template('main.html', form=form, name=[], name1=100 - ost)
+    ret = []
+    g = 0
+    for p in processed:
+        for i in range(0,len(p) - 1):
+            if p[i] == '0':
+                if (not (p[i - 1] in {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'})) or (i == 0):
+                    if p[i + 1] in {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'}:
+                        g = 1
+                        break
+            # print(i)
+        if g != 1 :
+            if eval(p):
+                ret.append(p)
+        g = 0
+    return ret
+
+
+def element1(str,element):
+    d = 0
+    for i in str:
+        if i == element:
+            return d
+        d = d + 1
+
+
+def solvewordrush(s, voc, word,hqhq,g,form,opo,g2,opo2):
+    processed = [s]
+    words = file(word)
+    i = 0
+    ost = len(voc) * 10
+    for c in voc:
+        i += 1
+        new_processed = []
+        for i in range(ord('а'), ord('я') + 1):
+            for p in processed:
+                if chr(i) not in p:
+                    if element1(p, c) < g - 1:
+                        # print(element1(p,c),p,c)
+                        # print(p.replace(c, chr(i))[:element1(p, c) + 1], p.replace(c, chr(i)),p.replace(c, chr(i))[:element1(p,c) + 1] in words[element1(p,c) + 1],'a' in words[element1(p,c) + 1],words[0])
+                        if p.replace(c, chr(i))[opo - 1:][:element1(p, c) + 1] in words[element1(p, c)]:
+                            # print(p.replace(c, chr(i))[:element1(p,c) + 1],p.replace(c, chr(i)))
+                            new_processed.append(p.replace(c, chr(i)))
+                            hqhq = hqhq.replace(c, chr(i))
+                    elif element1(p, c) < g2 - 1:
+                        if p.replace(c, chr(i))[:element1(p, c) + 1][opo2 - 1:] in words[element1(p, c)- (opo2 - 1)]:
+                            # print(p.replace(c, chr(i))[:element1(p,c) + 1],p.replace(c, chr(i)))
+                            new_processed.append(p.replace(c, chr(i)))
+                            hqhq = hqhq.replace(c, chr(i))
+                    else:
+                        new_processed.append(p.replace(c, chr(i)))
+        processed = new_processed
+        ost -= 10
+        render_template('main.html', form=form, name=[], name1= 100 - ost)
+    # print(words,processed)
+    ret = []
+    d = 0
+    for i in range(0, len(processed)):
+        # print(processed[i])
+        p = processed[i]
+        q = p
+        for b in range(0, len(q) - 1):
+            # print(b,len(q))
+            if p[b] in {"+", "=", '-', '*', '/', '(', ')'}:
+                # print(p[:b],b,p[b:])
+                p = p[:b] + ' ' + p[b + 1:]
+                # print(p)
+        ter = p.split()
+        # print(ter)
+        for c in ter:
+            if not (c in words[18]):
+                d = 1
+                break
+        if d == 0:
+            ret.append(processed[i])
+        d = 0
+    return ret
+
+
+def solvewordeng(s, voc, word,hqhq,g,form,opo,g2,opo2):
+    processed = [s]
+    words = file(word)
+    i = 0
+    ost = len(voc) * 10
+    for c in voc:
+        i += 1
+        new_processed = []
+        for i in range(ord('a'), ord('z') + 1):
+            for p in processed:
+                if chr(i) not in p:
+                    if element1(p, c) < g - 1:
+                        # print(element1(p,c),p,c)
+                        # print(p.replace(c, chr(i))[:element1(p, c) + 1], p.replace(c, chr(i)),p.replace(c, chr(i))[:element1(p,c) + 1] in words[element1(p,c) + 1],'a' in words[element1(p,c) + 1],words[0])
+                        if p.replace(c, chr(i))[opo - 1:][:element1(p, c) + 1] in words[element1(p, c)]:
+                            # print(p.replace(c, chr(i))[:element1(p,c) + 1],p.replace(c, chr(i)))
+                            new_processed.append(p.replace(c, chr(i)))
+                            hqhq = hqhq.replace(c, chr(i))
+                    elif element1(p, c) < g2 - 1:
+                        if p.replace(c, chr(i))[:element1(p, c) + 1][opo2 - 1:] in words[element1(p, c)- (opo2 - 1)]:
+                            # print(p.replace(c, chr(i))[:element1(p,c) + 1],p.replace(c, chr(i)))
+                            new_processed.append(p.replace(c, chr(i)))
+                            hqhq = hqhq.replace(c, chr(i))
+                    else:
+                        new_processed.append(p.replace(c, chr(i)))
+        processed = new_processed
+        ost -= 10
+        render_template('main.html', form=form, name=[], name1= 100 - ost)
+    # print(words,processed)
+    ret = []
+    d = 0
+    for i in range(0, len(processed)):
+        # print(processed[i])
+        p = processed[i]
+        q = p
+        for b in range(0, len(q) - 1):
+            # print(b,len(q))
+            if p[b] in {"+", "=", '-', '*', '/', '(', ')'}:
+                # print(p[:b],b,p[b:])
+                p = p[:b] + ' ' + p[b + 1:]
+                # print(p)
+        ter = p.split()
+        # print(ter)
+        for c in ter:
+            if not (c in words[18]):
+                d = 1
+                break
+        if d == 0:
+            ret.append(processed[i])
+        d = 0
+    return ret
+
+
+@app.route("/", methods=['GET', 'POST'])
+def hello():
+    form = MyForm(request.form)
+    name2 = []
+    if request.method == 'POST':  # запускается только если пользователь отправляет форму
+        name = request.form['name']
+        rot = request.form['drink']
+        tor = request.form['drinks']
+        if name == '':
+            name2 = []
+        else:
+            if rot == 'rad1':
+                # print(1)
+                voc = set(name) - {"+", "=", '-', '*', '/', '%', ' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '(', ')', '[', ']', '.', ',','<','>','&'}
+                if tor == 'words.txt':
+                    voc = voc - set('wertyuiopasdfghjklzxcvbnm')
+                z = len(name) - 1
+                i = 0
+                # print(1)
+                while i <= z:
+                    # print(1)
+                    if name[i] == '=' and name[i - 1] != '=' and name[i + 1] != '=':
+                        # print(name)
+                        name = name[:i] + '=' + name[i:]
+                        z = z + 1
+                        # print(name)
+                    i = i + 1
+                # print(1)
+                name2 = solve(name, voc,form)
+                # print(name2)name.txt
+                # print(1.5+1.5)
+            if rot == 'rad2':
+                items = []
+                for qwerrr in range(0,len(name)):
+                    items += name[qwerrr]
+                voc = list(unique_everseen(items))
+                if '+' in voc:
+                    voc.pop(voc.index('+'))
+                if '=' in voc:
+                    voc.pop(voc.index('='))
+                if '-' in voc:
+                    voc.pop(voc.index('-'))
+                if '*' in voc:
+                    voc.pop(voc.index('*'))
+                if '/' in voc:
+                    voc.pop(voc.index('/'))
+                if '%' in voc:
+                    voc.pop(voc.index('%'))
+                if ' ' in voc:
+                    voc.pop(voc.index(' '))
+                if '(' in voc:
+                    voc.pop(voc.index('('))
+                if ')' in voc:
+                    voc.pop(voc.index(')'))
+                # print(voc)
+                z = len(name) - 1
+                i = 0
+                wordno = name
+                while i <= z:
+                    if name[i] == '=' and name[i - 1] != '=' and name[i + 1] != '=':
+                        # print(nддддддддддддддддддддддддддддддддддame)
+                        name = name[:i] + '=' + name[i:]
+                        z = z + 1
+                        # print(name)
+                    i = i + 1
+                i = 0
+                iii = 0
+                g = 0
+                g2 = 0
+                opo = 0
+                z = len(wordno) - 1
+                while i <= z:
+                    if wordno[i] in set('() %/*-=+ '):
+                        wordno = wordno[:i] + wordno[1 + i:]
+                        iii += 1
+                        if (g != 0) and (i != 0) and (g2 == 0) and (name[i + iii - 2] in voc):
+                            g2 = i + iii
+                        if (g == 0) and (i != 0) :
+                            g = i + iii
+                        i = i - 1
+                        z = z - 1
+                    i = i + 1
+                # print(g)
+                opo2 = 0
+                i = 0
+                z = len(name)
+                while i < z:
+                    if name[i] in voc:
+                        # print(1)
+                        if (opo2 == 0) and (opo != 0) and (i >= g) :
+                            opo2 = i + 1
+                        if opo == 0 :
+                            opo = i + 1
+                    # print(name[i])
+                    i = i + 1
+                # print(g,opo,g2,opo2)
+                if not eval(name):
+                    name2 = 'error'
+                else:
+                    if tor == 'word_rus.txt':
+                        name2 = (solvewordrush(name, voc, tor,wordno,g,form,opo,g2,opo2))
+                    else:
+                        name2 = (solvewordeng(name, voc, tor,wordno,g,form,opo,g2,opo2))
+                # print(name2)
+    return render_template('main.html', form=form, name=name2, name1 = 0)
+
+
+if __name__ == "__main__":
+    # if(...):
+    #   raise ValueError("Заданный аргумент не является корректным ребусом")
+    # print(int('078'))
+    app.run()
